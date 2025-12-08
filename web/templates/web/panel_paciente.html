@@ -1,2 +1,34 @@
-<h1>Bienvenido Paciente {{ usuario.nombre }}</h1>
-<a href="{% url 'logout' %}">Cerrar sesión</a>
+{% extends "web/base.html" %}
+{% block title %}Panel del Paciente{% endblock %}
+
+{% block content %}
+  <h2>Bienvenido, paciente {{ nombre_paciente }}</h2>
+
+  <p>¿Qué deseas hacer hoy?</p>
+
+  <a href="{% url 'logout' %}"><button>Cerrar sesión</button></a>
+
+  <hr>
+  <h3>Próximas citas</h3>
+
+  {% if citas_proximas %}
+    <table border="1" cellspacing="0" cellpadding="5">
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Doctor</th>
+        <th>Especialidad</th>
+      </tr>
+      {% for cita in citas_proximas %}
+        <tr>
+          <td>{{ cita.fecha_limite|date:"d/m/Y" }}</td>
+          <td>{{ cita.fecha_limite|time:"H:i" }}</td>
+          <td>{{ cita.Id_doctor.Id_usuario.Id_usuario.nombre }} {{ cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}</td>
+          <td>{{ cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No tienes citas próximas.</p>
+  {% endif %}
+{% endblock %}

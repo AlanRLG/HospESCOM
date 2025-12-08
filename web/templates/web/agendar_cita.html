@@ -1,0 +1,72 @@
+{% extends "web/base.html" %}
+
+{% block title %}Agendar Cita{% endblock %}
+
+{% block content %}
+<h2>Agendar Nueva Cita</h2>
+<form method="POST">
+  {% csrf_token %}
+  
+  <label>Especialidad:</label>
+  <select name="especialidad" id="especialidad" required>
+    <option value="">-- Selecciona --</option>
+    {% for esp in especialidades %}
+      <option value="{{ esp.Id_Especialidad }}">{{ esp.tipo_Especialidad }}</option>
+    {% endfor %}
+  </select>
+
+  <br><br>
+
+  <label>Doctor:</label>
+  <select name="doctor" id="doctor" required>
+    <option value="">-- Selecciona una especialidad primero --</option>
+  </select>
+
+  <br><br>
+
+  <label>Fecha:</label>
+  <input type="date" name="fecha" required>
+
+  <br><br>
+
+  <label>Hora:</label>
+  <input type="time" name="hora" required>
+
+  <br><br>
+
+  <button type="submit">Agendar</button>
+  <a href="{% url 'panel_paciente' %}"><button type="button">Regresar</button></a>
+</form>
+
+{% for message in messages %}
+  <p class="{% if 'correctamente' in message %}success{% else %}error{% endif %}">{{ message }}</p>
+{% endfor %}
+
+<script>
+    document.getElementById("especialidad").addEventListener("change", function() {
+        const espId = this.value;
+        const doctorSelect = document.getElementById("doctor");
+        doctorSelect.innerHTML = "<option value=''>Cargando...</option>";
+        
+        if (espId) {
+            fetch(`/obtener_doctores/${espId}/`)
+            .then(response => response.json())
+            .then(data => {
+                doctorSelect.innerHTML = "";
+                if (data.length === 0) {
+                    doctorSelect.innerHTML = "<option value=''>No hay doctores disponibles</option>";
+                } else {
+                    data.forEach(d => {
+                        const option = document.createElement("option");
+                        option.value = d.id;
+                        option.textContent = d.nombre;
+                        doctorSelect.appendChild(option);
+                    });
+                }
+            });
+        } else {
+            doctorSelect.innerHTML = "<option value=''>-- Selecciona una especialidad primero --</option>";
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "web/base.html" %}
+
+{% block title %}Datos Personales{% endblock %}
+
+{% block content %}
+
+<h2>Mis Datos Personales</h2>
+
+<div class="datos-container">
+
+    <h3>Datos del Usuario</h3>
+    <p><strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido_P }} {{ usuario.apellido_M }}</p>
+    <p><strong>CURP:</strong> {{ usuario.curp }}</p>
+    <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+    <p><strong>Teléfono:</strong> {{ usuario.num_Tel }}</p>
+
+    <hr>
+
+    <h3>Datos del Paciente</h3>
+    <p><strong>Edad:</strong> {{ paciente.edad }}</p>
+    <p><strong>Peso:</strong> {{ paciente.peso }} kg</p>
+    <p><strong>Estatura:</strong> {{ paciente.estatura }} m</p>
+    <p><strong>Sexo:</strong> {{ paciente.sexo }}</p>
+    <p><strong>Tipo de Sangre:</strong> {{ paciente.Tipo_sangre }}</p>
+    <p><strong>Contacto de Emergencia:</strong> {{ paciente.contacto_Emer }}</p>
+
+    <hr>
+
+    <h3>Registro</h3>
+    <p><strong>Fecha de Registro:</strong> {{ paciente.fecha_Regis }}</p>
+
+    <br>
+
+    <a href="{% url 'panel_paciente' %}">
+        <button type="button">Regresar</button>
+    </a>
+
+</div>
+{% endblock %}

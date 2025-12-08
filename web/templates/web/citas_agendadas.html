@@ -1,0 +1,38 @@
+{% extends "web/base.html" %}
+{% block title %}Citas Agendadas{% endblock %}
+{% load custom_filters %}
+
+{% block content %}
+  <h2>Historial de Citas</h2>
+
+  {% if citas %}
+    <table border="1" cellspacing="0" cellpadding="6">
+      <tr>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Doctor</th>
+        <th>Especialidad</th>
+        <th>Estatus</th>
+        <th>Fecha Movimiento</th>
+        <th>Política de Cancelación</th>
+        <th>Monto Devuelto</th>
+      </tr>
+      {% for cita in citas %}
+        {% with bitacora=bitacoras|get_item:cita.Id_cita %}
+        <tr>
+          <td>{{ cita.fecha_limite|date:"d/m/Y" }}</td>
+          <td>{{ cita.fecha_limite|time:"H:i" }}</td>
+          <td>{{ cita.Id_doctor.Id_usuario.Id_usuario.nombre }} {{ cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}</td>
+          <td>{{ cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
+          <td>{{ bitacora.estatus_cita|default:"Sin estatus" }}</td>
+          <td>{{ bitacora.fecha_mov|date:"d/m/Y H:i"|default:"—" }}</td>
+          <td>{{ bitacora.Politica_cancela|default:"—" }}</td>
+          <td>{{ bitacora.monto_Dev|default:"—" }}</td>
+        </tr>
+        {% endwith %}
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No tienes citas registradas.</p>
+  {% endif %}
+{% endblock %}

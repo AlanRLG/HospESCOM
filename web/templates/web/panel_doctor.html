@@ -1,2 +1,10 @@
-<h1>Bienvenido Doctor {{ usuario.nombre }}</h1>
-<a href="{% url 'logout' %}">Cerrar sesión</a>
+{% extends "web/base.html" %}
+{% block title %}Panel del Doctor{% endblock %}
+
+{% block content %}
+  <h2>Bienvenido, doctor {{ nombre_doctor }}</h2>
+
+  <p>¿Qué deseas hacer hoy?</p>
+
+  <a href="{% url 'logout' %}"><button>Cerrar sesión</button></a>
+{% endblock %}

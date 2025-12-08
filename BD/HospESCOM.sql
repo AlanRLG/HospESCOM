@@ -8,7 +8,7 @@ BEGIN
 END
 GO
 
--- Creación de la Base de Datos
+-- CreaciÃ³n de la Base de Datos
 CREATE DATABASE HospESCOM;
 GO
 
@@ -20,6 +20,7 @@ CREATE TABLE TipoUsuario (
     Id_tipoUsuario INT PRIMARY KEY IDENTITY(1,1),
     NombreUsuario NVARCHAR(100) NOT NULL
 );
+GO
 
 -- Tabla: Usuario
 CREATE TABLE Usuario (
@@ -29,7 +30,7 @@ CREATE TABLE Usuario (
     apellido_M NVARCHAR(100),
     curp NVARCHAR(18) UNIQUE NOT NULL,
     correo NVARCHAR(150) UNIQUE NOT NULL,
-    contraseña NVARCHAR(255) NOT NULL,
+    contraseÃ±a NVARCHAR(255) NOT NULL,
     calle NVARCHAR(150),
     colonia NVARCHAR(100),
     CP NVARCHAR(10),
@@ -37,24 +38,25 @@ CREATE TABLE Usuario (
     Id_tipoUsuario INT NOT NULL,
     FOREIGN KEY (Id_tipoUsuario) REFERENCES TipoUsuario(Id_tipoUsuario)
 );
+GO
 
 -- Tabla: Empleado
 CREATE TABLE Empleado (
     id_Empleado INT PRIMARY KEY IDENTITY(1,1),
     puesto NVARCHAR(100) NOT NULL,
-    horario NVARCHAR(100),
     salario DECIMAL(10,2),
-    dias_labo NVARCHAR(50),
     Id_usuario INT NOT NULL,
     FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario)
 );
+GO
 
 -- Tabla: Recepcionista
 CREATE TABLE Recepcionista (
     id_Recepcionista INT PRIMARY KEY IDENTITY(1,1),
     Id_usuario INT NOT NULL,
-    FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario)
+    FOREIGN KEY (Id_usuario) REFERENCES Empleado(id_Empleado)
 );
+GO
 
 -- Tabla: Especialidad
 CREATE TABLE Especialidad (
@@ -63,13 +65,14 @@ CREATE TABLE Especialidad (
     descripcion NVARCHAR(500),
     costo_especialidad DECIMAL(10,2)
 );
+GO
 
 -- Tabla: Consultorio
 CREATE TABLE Consultorio (
     Id_consultorio INT PRIMARY KEY IDENTITY(1,1),
     disponibilidad BIT NOT NULL,
-    equipamento NVARCHAR(500)
 );
+GO
 
 -- Tabla: Doctor
 CREATE TABLE Doctor (
@@ -79,20 +82,18 @@ CREATE TABLE Doctor (
     Id_usuario INT NOT NULL,
     Id_especialidad INT NOT NULL,
     Id_consultorio INT NOT NULL,
-    FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario),
+    FOREIGN KEY (Id_usuario) REFERENCES Empleado(id_Empleado),
     FOREIGN KEY (Id_especialidad) REFERENCES Especialidad(Id_Especialidad),
     FOREIGN KEY (Id_consultorio) REFERENCES Consultorio(Id_consultorio)
 );
-select * from auth_group;
+GO
 
 -- Tabla: Paciente
 CREATE TABLE Paciente (
     Id_Paciente INT PRIMARY KEY IDENTITY(1,1),
     edad INT NOT NULL,
     peso DECIMAL(5,2),
-    alergias NVARCHAR(500),
     estatura DECIMAL(5,2),
-    padecimientos_prev NVARCHAR(500),
     sexo NVARCHAR(10),
     Tipo_sangre NVARCHAR(10),
     contacto_Emer NVARCHAR(100),
@@ -100,6 +101,7 @@ CREATE TABLE Paciente (
     Id_usuario INT NOT NULL,
     FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario)
 );
+GO
 
 -- Tabla: Cita
 CREATE TABLE Cita (
@@ -110,25 +112,7 @@ CREATE TABLE Cita (
     FOREIGN KEY (Id_paciente) REFERENCES Paciente(Id_Paciente),
     FOREIGN KEY (Id_doctor) REFERENCES Doctor(Id_doctor)
 );
-
--- Tabla: bitacora_Historial
-/*CREATE TABLE bitacora_Historial (
-    id_Historial INT PRIMARY KEY IDENTITY(1,1),
-    Folio_cita NVARCHAR(50),
-    Hora_cita TIME,
-    Id_Paciente INT,
-    Folio_receta NVARCHAR(50),
-    Id_doctor INT,
-    Estatus_consulta NVARCHAR(100),
-    Especialidad NVARCHAR(100),
-    Consultorio NVARCHAR(50),
-    Usuario NVARCHAR(100),
-    Fecha_cita DATE,
-    Id_Cita INT,
-    FOREIGN KEY (Id_Cita) REFERENCES Cita(Id_cita),
-    FOREIGN KEY (Id_Paciente) REFERENCES Paciente(Id_Paciente),
-    FOREIGN KEY (Id_doctor) REFERENCES Doctor(Id_doctor)
-);*/
+GO
 
 -- Tabla: bitacora_Estatus
 CREATE TABLE bitacora_Estatus (
@@ -142,6 +126,7 @@ CREATE TABLE bitacora_Estatus (
     Id_cita INT NOT NULL,
     FOREIGN KEY (Id_cita) REFERENCES Cita(Id_cita)
 );
+GO
 
 -- Tabla: pago_Cita
 CREATE TABLE pago_Cita (
@@ -156,6 +141,7 @@ CREATE TABLE pago_Cita (
     FOREIGN KEY (Id_usuario) REFERENCES Usuario(Id_usuario),
     FOREIGN KEY (Id_cita) REFERENCES Cita(Id_cita)
 );
+GO
 
 -- Tabla: Receta
 CREATE TABLE Receta (
@@ -170,6 +156,7 @@ CREATE TABLE Receta (
     Id_Cita INT NOT NULL,
     FOREIGN KEY (Id_Cita) REFERENCES Cita(Id_cita)
 );
+GO
 
 -- Tabla: Farmacia_Medicamentos
 CREATE TABLE Farmacia_Medicamentos (
@@ -180,6 +167,7 @@ CREATE TABLE Farmacia_Medicamentos (
     lote NVARCHAR(50),
     cantidad INT NOT NULL
 );
+GO
 
 -- Tabla: Venta_Med
 CREATE TABLE Venta_Med (
@@ -192,6 +180,7 @@ CREATE TABLE Venta_Med (
     FOREIGN KEY (Id_Medicamento) REFERENCES Farmacia_Medicamentos(Id_medicamento),
     FOREIGN KEY (Id_recepcionista) REFERENCES Recepcionista(id_Recepcionista)
 );
+GO
 
 -- Tabla: Servicio
 CREATE TABLE Servicio (
@@ -199,8 +188,8 @@ CREATE TABLE Servicio (
     nombre_servicio NVARCHAR(200) NOT NULL,
     costo DECIMAL(10,2) NOT NULL,
     descripcion NVARCHAR(500),
-    horario NVARCHAR(100)
 );
+GO
 
 -- Tabla: Venta_servicio
 CREATE TABLE Venta_servicio (
@@ -212,6 +201,7 @@ CREATE TABLE Venta_servicio (
     FOREIGN KEY (id_Servicio) REFERENCES Servicio(Id_Servicio),
     FOREIGN KEY (Id_recepcionista) REFERENCES Recepcionista(id_Recepcionista)
 );
+GO
 
 -- Tabla: Ticket
 CREATE TABLE Ticket (
@@ -222,6 +212,7 @@ CREATE TABLE Ticket (
     FOREIGN KEY (id_VentaServicio) REFERENCES Venta_servicio(id_VentaServicio),
     FOREIGN KEY (id_VentaMed) REFERENCES Venta_Med(Id_VentaMed)
 );
+GO
 
 -- Tabla: pago_Ticket
 CREATE TABLE pago_Ticket (
@@ -233,6 +224,7 @@ CREATE TABLE pago_Ticket (
     id_ticket INT NOT NULL,
     FOREIGN KEY (id_ticket) REFERENCES Ticket(id_ticket)
 );
+GO
 
 -- Tabla: Cliente
 CREATE TABLE Cliente (
@@ -242,8 +234,9 @@ CREATE TABLE Cliente (
     correoC NVARCHAR(150),
     genero NVARCHAR(20)
 );
+GO
 
--- Tabla intermedia: Cliente_Venta_servicio (relación M:M entre Cliente y Venta_servicio)
+-- Tabla intermedia: Cliente_Venta_servicio (relaciÃ³n M:M entre Cliente y Venta_servicio)
 CREATE TABLE Cliente_Venta_servicio (
     Id_Cliente INT NOT NULL,
     id_VentaServicio INT NOT NULL,
@@ -251,8 +244,9 @@ CREATE TABLE Cliente_Venta_servicio (
     FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),
     FOREIGN KEY (id_VentaServicio) REFERENCES Venta_servicio(id_VentaServicio)
 );
+GO
 
--- Tabla intermedia: Cliente_Venta_Med (relación M:M entre Cliente y Venta_Med)
+-- Tabla intermedia: Cliente_Venta_Med (relaciÃ³n M:M entre Cliente y Venta_Med)
 CREATE TABLE Cliente_Venta_Med (
     Id_Cliente INT NOT NULL,
     Id_VentaMed INT NOT NULL,
@@ -260,5 +254,88 @@ CREATE TABLE Cliente_Venta_Med (
     FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),
     FOREIGN KEY (Id_VentaMed) REFERENCES Venta_Med(Id_VentaMed)
 );
+GO
 
+-- Tabla: Alergia
+CREATE TABLE Alergia (
+    Id_Alergia INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(150) UNIQUE NOT NULL
+);
+GO
+
+-- Tabla Paciente_Alergia
+CREATE TABLE Paciente_Alergia (
+    Id_Paciente INT NOT NULL,
+    Id_Alergia INT NOT NULL,
+    PRIMARY KEY (Id_Paciente, Id_Alergia),
+    FOREIGN KEY (Id_Paciente) REFERENCES Paciente(Id_Paciente),
+    FOREIGN KEY (Id_Alergia) REFERENCES Alergia(Id_Alergia)
+);
+GO
+
+-- Tabla Padecimiento
+CREATE TABLE Padecimiento (
+    Id_Padecimiento INT PRIMARY KEY IDENTITY(1,1),
+    nombre NVARCHAR(150) UNIQUE NOT NULL
+);
+GO
+
+-- Tabla Paciente_padefimiento
+CREATE TABLE Paciente_Padecimiento (
+    Id_Paciente INT NOT NULL,
+    Id_Padecimiento INT NOT NULL,
+    PRIMARY KEY (Id_Paciente, Id_Padecimiento),
+    FOREIGN KEY (Id_Paciente) REFERENCES Paciente(Id_Paciente),
+    FOREIGN KEY (Id_Padecimiento) REFERENCES Padecimiento(Id_Padecimiento)
+);
+GO
+
+-- Tablas para Consultorio (Equipamento)
+CREATE TABLE Equipo_Medico (
+    Id_Equipo INT PRIMARY KEY IDENTITY(1,1),
+    nombre_equipo NVARCHAR(150) UNIQUE NOT NULL,
+    descripcion NVARCHAR(500)
+);
+GO
+
+-- Tabla: Consultorio_Equipo
+CREATE TABLE Consultorio_Equipo (
+    Id_consultorio INT NOT NULL,
+    Id_Equipo INT NOT NULL,
+    cantidad_asignada INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (Id_consultorio, Id_Equipo),
+    FOREIGN KEY (Id_consultorio) REFERENCES Consultorio(Id_consultorio),
+    FOREIGN KEY (Id_Equipo) REFERENCES Equipo_Medico(Id_Equipo)
+);
+GO
+
+-- Tablas para Empleado y Servicio (Horarios)
+CREATE TABLE Dia_Semana (
+    Id_Dia INT PRIMARY KEY, 
+    nombre_dia NVARCHAR(20) UNIQUE NOT NULL
+);
+GO
+
+-- Tabla: Horario Empleado
+CREATE TABLE HorarioEmpleado (
+    Id_HorarioEmpleado INT PRIMARY KEY IDENTITY(1,1),
+    id_Empleado INT NOT NULL,
+    Id_Dia INT NOT NULL,
+    hora_entrada TIME NOT NULL,
+    hora_salida TIME NOT NULL,
+    FOREIGN KEY (id_Empleado) REFERENCES Empleado(id_Empleado),
+    FOREIGN KEY (Id_Dia) REFERENCES Dia_Semana(Id_Dia)
+);
+GO
+
+-- Tabla Horario_Servicio
+CREATE TABLE Horario_Servicio (
+    Id_HorarioServicio INT PRIMARY KEY IDENTITY(1,1),
+    id_Servicio INT NOT NULL,
+    Id_Dia INT NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    FOREIGN KEY (id_Servicio) REFERENCES Servicio(Id_Servicio),
+    FOREIGN KEY (Id_Dia) REFERENCES Dia_Semana(Id_Dia)
+);
 GO

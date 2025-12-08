@@ -1,0 +1,37 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}HospESCOM{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style_base.css' %}">
+</head>
+
+<body>
+  <header>
+    <h1>HospESCOM</h1>
+    <nav>
+      {% if request.session.usuario_tipo == 'paciente' %}
+        <a href="{% url 'panel_paciente' %}">Inicio</a>
+        <a href="{% url 'datos_personales' %}">Datos personales</a>
+        <a href="{% url 'agendar_cita' %}">Agendar Cita</a>
+        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+      {% elif request.session.usuario_tipo == 'doctor' %}
+        <a href="{% url 'panel_doctor' %}">Panel Doctor</a>
+        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+      {% elif request.session.usuario_tipo == 'recepcionista' %}
+        <a href="{% url 'panel_recepcionista' %}">Panel Recepción</a>
+        <a href="{% url 'logout' %}">Cerrar Sesión</a>
+      {% else %}
+        <a href="{% url 'index' %}">Inicio</a>
+        <a href="{% url 'login' %}">Iniciar Sesión</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <div class="container">
+    {% block content %}
+    {% endblock %}
+  </div>
+</body>
+</html>
