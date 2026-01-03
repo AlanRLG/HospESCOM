@@ -106,6 +106,7 @@ class Cita(models.Model):
     fecha_limite = models.DateTimeField(null=True, blank=True)
     Id_paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE, db_column='Id_paciente')
     Id_doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, db_column='Id_doctor')
+    linea_pago = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         managed = False
@@ -161,6 +162,18 @@ class Receta(models.Model):
         managed = False
         db_table = 'Receta'
 
+class RecetaMedicamento(models.Model):
+    Id_Receta_Medicamento = models.AutoField(primary_key=True, db_column="Id_Receta_Medicamento")
+    Id_Receta = models.ForeignKey(Receta, on_delete=models.CASCADE, related_name="detalle_medicamentos", db_column="Id_Receta") 
+    medicamento = models.CharField(max_length=200)
+    frecuencia = models.CharField(max_length=100)
+    duracion = models.CharField(max_length=100)
+    indicaciones = models.CharField(max_length=500, null=True, blank=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Receta_Medicamento'
+
 
 class FarmaciaMedicamentos(models.Model):
     Id_medicamento = models.AutoField(primary_key=True)
@@ -173,18 +186,6 @@ class FarmaciaMedicamentos(models.Model):
     class Meta:
         managed = False
         db_table = 'Farmacia_Medicamentos'
-
-
-class VentaMed(models.Model):
-    Id_VentaMed = models.AutoField(primary_key=True)
-    cantidad = models.IntegerField()
-    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
-    Id_Medicamento = models.ForeignKey(FarmaciaMedicamentos, on_delete=models.CASCADE, db_column='Id_Medicamento')
-    Id_recepcionista = models.ForeignKey(Recepcionista, on_delete=models.CASCADE, db_column='Id_recepcionista')
-
-    class Meta:
-        managed = False
-        db_table = 'Venta_Med'
 
 
 # ==============================================
@@ -202,41 +203,6 @@ class Servicio(models.Model):
         db_table = 'Servicio'
 
 
-class VentaServicio(models.Model):
-    id_VentaServicio = models.AutoField(primary_key=True)
-    tipo_servicio = models.CharField(max_length=100, null=True, blank=True)
-    subtotal = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    id_Servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE, db_column='id_Servicio')
-    Id_recepcionista = models.ForeignKey(Recepcionista, on_delete=models.CASCADE, db_column='Id_recepcionista')
-
-    class Meta:
-        managed = False
-        db_table = 'Venta_servicio'
-
-
-class Ticket(models.Model):
-    id_ticket = models.AutoField(primary_key=True)
-    costo_total = models.DecimalField(max_digits=10, decimal_places=2)
-    id_VentaServicio = models.ForeignKey(VentaServicio, on_delete=models.CASCADE, db_column='id_VentaServicio', null=True, blank=True)
-    id_VentaMed = models.ForeignKey(VentaMed, on_delete=models.CASCADE, db_column='id_VentaMed', null=True, blank=True)
-
-    class Meta:
-        managed = False
-        db_table = 'Ticket'
-
-
-class PagoTicket(models.Model):
-    id_pagoTicket = models.AutoField(primary_key=True)
-    fecha_pago = models.DateTimeField()
-    estado_pagoT = models.CharField(max_length=50)
-    metodo_pagoT = models.CharField(max_length=50)
-    des_pagoT = models.CharField(max_length=500, null=True, blank=True)
-    id_ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, db_column='id_ticket')
-
-    class Meta:
-        managed = False
-        db_table = 'pago_Ticket'
-
 
 # ==============================================
 # CLIENTES Y RELACIONES M:M
@@ -252,26 +218,6 @@ class Cliente(models.Model):
     class Meta:
         managed = False
         db_table = 'Cliente'
-
-
-class ClienteVentaServicio(models.Model):
-    Id_Cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, db_column='Id_Cliente')
-    id_VentaServicio = models.ForeignKey(VentaServicio, on_delete=models.CASCADE, db_column='id_VentaServicio')
-
-    class Meta:
-        managed = False
-        db_table = 'Cliente_Venta_servicio'
-        unique_together = (('Id_Cliente', 'id_VentaServicio'),)
-
-
-class ClienteVentaMed(models.Model):
-    Id_Cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, db_column='Id_Cliente')
-    Id_VentaMed = models.ForeignKey(VentaMed, on_delete=models.CASCADE, db_column='Id_VentaMed')
-
-    class Meta:
-        managed = False
-        db_table = 'Cliente_Venta_Med'
-        unique_together = (('Id_Cliente', 'Id_VentaMed'),)
 
 
 # ==============================================
@@ -376,3 +322,71 @@ class HorarioServicio(models.Model):
     class Meta:
         managed = False
         db_table = 'Horario_Servicio'
+
+class VistaDetalleReceta(models.Model):
+    Id_Receta = models.IntegerField(primary_key=True)
+    fecha_receta = models.DateField()
+    diagnostico = models.CharField(max_length=500)
+    medicamentos = models.CharField(max_length=500)
+    tratamiento = models.CharField(max_length=500)
+    observaciones = models.CharField(max_length=500)
+    duracion = models.CharField(max_length=100)
+    Nombre_Paciente = models.CharField(max_length=200)
+    Nombre_Doctor = models.CharField(max_length=200)
+    tipo_Especialidad = models.CharField(max_length=100)
+    cedula_Pro = models.CharField(max_length=50)
+
+    class Meta:
+        managed = False  
+        db_table = 'Vista_Detalle_Receta'
+
+
+class Ticket(models.Model):
+    Id_Ticket = models.AutoField(primary_key=True)
+    fecha = models.DateTimeField()
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    Id_Recepcionista = models.ForeignKey('Recepcionista', on_delete=models.CASCADE, db_column='Id_Recepcionista')
+    Id_Paciente = models.ForeignKey('Paciente', on_delete=models.SET_NULL, null=True, blank=True, db_column='Id_Paciente')
+    Id_Cliente = models.ForeignKey('Cliente', on_delete=models.SET_NULL, null=True, blank=True, db_column='Id_Cliente')
+
+    class Meta:
+        managed = False
+        db_table = 'Ticket'
+
+class TicketMedicamento(models.Model):
+    Id_TicketMed = models.AutoField(primary_key=True)
+    Id_Ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, db_column='Id_Ticket')
+    Id_Medicamento = models.ForeignKey( 'FarmaciaMedicamentos', on_delete=models.CASCADE, db_column='Id_Medicamento')
+    cantidad = models.IntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'Ticket_Medicamento'
+
+    @property
+    def subtotal(self):
+        return self.cantidad * self.precio_unitario
+
+class TicketServicio(models.Model):
+    Id_TicketServicio = models.AutoField(primary_key=True)
+    Id_Ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, db_column='Id_Ticket')
+    Id_Servicio = models.ForeignKey('Servicio', on_delete=models.CASCADE, db_column='Id_Servicio')
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        managed = False
+        db_table = 'Ticket_Servicio'
+
+class PagoTicket(models.Model):
+    Id_PagoTicket = models.AutoField(primary_key=True)
+    Id_Ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, db_column='Id_Ticket')
+    fecha_pago = models.DateTimeField()
+    metodo_pago = models.CharField(max_length=50)
+    estado_pago = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=500)
+
+    class Meta:
+        managed = False
+        db_table = 'Pago_Ticket'
+

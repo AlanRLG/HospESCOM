@@ -1,0 +1,33 @@
+{% extends "web/base.html" %}
+{% block title %}Mis Datos{% endblock %}
+
+{% block content %}
+<h2>Datos personales</h2>
+
+<h3>Información personal</h3>
+<p><b>Nombre:</b> {{ usuario.nombre }} {{ usuario.apellido_P }} {{ usuario.apellido_M }}</p>
+<p><b>CURP:</b> {{ usuario.curp }}</p>
+<p><b>Correo:</b> {{ usuario.correo }}</p>
+<p><b>Teléfono:</b> {{ usuario.num_Tel }}</p>
+
+<h3>Información laboral</h3>
+<p><b>Puesto:</b> {{ empleado.puesto }}</p>
+<p><b>Salario:</b> ${{ empleado.salario }}</p>
+
+<h3>Información médica</h3>
+<p><b>Especialidad:</b> {{ doctor.Id_especialidad.tipo_Especialidad }}</p>
+<p><b>Cédula profesional:</b> {{ doctor.cedula_Pro }}</p>
+<p><b>Consultorio:</b> {{ doctor.Id_consultorio.Id_consultorio }}</p>
+<p><b>Disponibilidad:</b>
+    {% if doctor.disponibilidad %}
+        Disponible
+    {% else %}
+        No disponible
+    {% endif %}
+</p>
+
+<br>
+<a href="{% url 'panel_doctor' %}">
+    <button type="button">Regresar</button>
+</a>
+{% endblock %}

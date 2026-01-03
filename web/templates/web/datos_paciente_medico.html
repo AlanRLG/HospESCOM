@@ -1,0 +1,64 @@
+{% extends "web/base.html" %}
+{% block title %}Datos del Paciente{% endblock %}
+
+{% block content %}
+<h2>Datos del Paciente</h2>
+
+<p><b>Nombre:</b> {{ usuario.nombre }} {{ usuario.apellido_P }} {{ usuario.apellido_M }}</p>
+<p><b>Edad:</b> {{ paciente.edad }}</p>
+<p><b>Sexo:</b> {{ paciente.sexo }}</p>
+<p><b>Tipo de sangre:</b> {{ paciente.Tipo_sangre }}</p>
+
+<h3>Alergias</h3>
+<ul>
+{% for a in alergias %}
+    <li>{{ a.nombre }}</li>
+{% empty %}
+    <li>No registradas</li>
+{% endfor %}
+</ul>
+
+<h3>Padecimientos</h3>
+<ul>
+{% for p in padecimientos %}
+    <li>{{ p.nombre }}</li>
+{% empty %}
+    <li>No registrados</li>
+{% endfor %}
+</ul>
+
+<h3>Historial de citas</h3>
+
+{% if citas %}
+<table border="1" cellpadding="6" cellspacing="0">
+    <tr>
+        <th>Folio</th>
+        <th>Fecha cita</th>
+        <th>Médico</th>
+        <th>Especialidad</th>
+        <th>Paciente</th>
+        <th>Diagnóstico</th>
+        <th>Consultorio</th>
+    </tr>
+
+    {% for c in citas %}
+    <tr>
+        <td>{{ c.id_bitacora }}</td>
+        <td>{{ c.fecha_cita|date:"d/m/Y" }}</td>
+        <td>Dr. {{ c.nombre_medico }} {{ c.apellido_medico }}</td>
+        <td>{{ c.especialidad }}</td>
+        <td>{{ usuario.nombre }} {{ usuario.apellido_P }}</td>
+        <td>{{ c.diagnostico|default:"—" }}</td>
+        <td>{{ c.consultorio }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>Sin historial de citas.</p>
+{% endif %}
+<br>
+
+<a href="{% url 'citas_medico' %}">
+    <button>Regresar</button>
+</a>
+{% endblock %}

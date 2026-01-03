@@ -1,0 +1,48 @@
+{% extends "web/base.html" %}
+{% block title %}Servicios Extras{% endblock %}
+
+{% block content %}
+<h2>Servicios Extras</h2>
+
+<a href="{% url 'alta_servicio' %}">
+  <button>➕ Nuevo servicio</button>
+</a>
+
+<br><br>
+
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Costo</th>
+      <th>Descripción</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in servicios %}
+    <tr>
+      <td>{{ s.Id_Servicio }}</td>
+      <td>{{ s.nombre_servicio }}</td>
+      <td>${{ s.costo }}</td>
+      <td>{{ s.descripcion }}</td>
+      <td>
+        <a href="{% url 'editar_servicio' s.Id_Servicio %}">
+          <button>Editar</button>
+        </a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5">No hay servicios registrados</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<br>
+<a href="{% url 'panel_recepcionista' %}">
+  <button>Regresar</button>
+</a>
+{% endblock %}

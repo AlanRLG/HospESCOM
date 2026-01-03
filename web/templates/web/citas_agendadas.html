@@ -3,36 +3,256 @@
 {% load custom_filters %}
 
 {% block content %}
-  <h2>Historial de Citas</h2>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  {% if citas %}
-    <table border="1" cellspacing="0" cellpadding="6">
-      <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Doctor</th>
-        <th>Especialidad</th>
-        <th>Estatus</th>
-        <th>Fecha Movimiento</th>
-        <th>Política de Cancelación</th>
-        <th>Monto Devuelto</th>
-      </tr>
-      {% for cita in citas %}
-        {% with bitacora=bitacoras|get_item:cita.Id_cita %}
-        <tr>
-          <td>{{ cita.fecha_limite|date:"d/m/Y" }}</td>
-          <td>{{ cita.fecha_limite|time:"H:i" }}</td>
-          <td>{{ cita.Id_doctor.Id_usuario.Id_usuario.nombre }} {{ cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}</td>
-          <td>{{ cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
-          <td>{{ bitacora.estatus_cita|default:"Sin estatus" }}</td>
-          <td>{{ bitacora.fecha_mov|date:"d/m/Y H:i"|default:"—" }}</td>
-          <td>{{ bitacora.Politica_cancela|default:"—" }}</td>
-          <td>{{ bitacora.monto_Dev|default:"—" }}</td>
-        </tr>
-        {% endwith %}
-      {% endfor %}
-    </table>
-  {% else %}
-    <p>No tienes citas registradas.</p>
-  {% endif %}
+<h2>Historial de Citas</h2>
+
+<form method="GET" style="margin-bottom:20px;">
+  <label>Fecha:</label>
+  <input type="date" name="fecha" value="{{ request.GET.fecha }}">
+
+  <label>Estatus:</label>
+  <select name="estatus">
+    <option value="">-- Todos --</option>
+    <option value="Agendada pendiente de pago"
+      {% if request.GET.estatus == "Agendada pendiente de pago" %}selected{% endif %}>
+      Agendada pendiente de pago
+    </option>
+    <option value="Pagada pendiente por atender"
+      {% if request.GET.estatus == "Pagada pendiente por atender" %}selected{% endif %}>
+      Pagada pendiente por atender
+    </option>
+    <option value="Cancelada falta de pago"
+      {% if request.GET.estatus == "Cancelada falta de pago" %}selected{% endif %}>
+      Cancelada falta de pago
+    </option>
+    <option value="Cancelada paciente"
+      {% if request.GET.estatus == "Cancelada paciente" %}selected{% endif %}>
+      Cancelada paciente
+    </option>
+    <option value="Cancelada Doctor"
+      {% if request.GET.estatus == "Cancelada Doctor" %}selected{% endif %}>
+      Cancelada Doctor
+    </option>
+     <option value="Atendida"
+      {% if request.GET.estatus == "Atendida" %}selected{% endif %}>
+      Atendida
+    </option>
+    <option value="No acudió"
+      {% if request.GET.estatus == "No acudió" %}selected{% endif %}>
+      No acudió
+    </option>
+  </select>
+
+  <button type="submit">Buscar</button>
+  <a href="{% url 'citas_agendadas' %}"><button type="button">Limpiar</button></a>
+</form>
+
+
+{% if citas %}
+<table border="1" cellspacing="0" cellpadding="6">
+  <tr>
+    <th>Folio</th>
+    <th>Fecha cita</th>
+    <th>Hora cita</th>
+    <th>Doctor</th>
+    <th>Especialidad</th>
+    <th>Consultorio</th>
+    <th>Estatus</th>
+    <th>Fecha límite de pago</th>
+    <th>Pagar</th>
+    <th>Cancelar</th>
+  </tr>
+
+  {% for cita in citas %}
+  {% with bitacora=bitacoras|get_item:cita.Id_cita %}
+  <tr id="fila-cita-{{ cita.Id_cita }}">
+    <td>{{ cita.Id_cita }}</td>
+    <td>{{ bitacora.fecha_cita|date:"d/m/Y" }}</td>
+    <td>{{ bitacora.hora_cita|time:"H:i" }}</td>
+
+    <td>{{ cita.Id_doctor.Id_usuario.Id_usuario.nombre }} {{ cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}</td>
+    <td>{{ cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
+    <td>{{ cita.Id_doctor.Id_consultorio.Id_consultorio }}</td>
+
+    <td id="estatus-{{ cita.Id_cita }}">{{ bitacora.estatus_cita|default:"Sin estatus" }}</td>
+    <td>{{ cita.fecha_limite|date:"d/m/Y H:i"|default:"—" }}</td>
+
+    <!-- PAGAR -->
+    <td>
+      {% if bitacora.estatus_cita == "Agendada pendiente de pago" %}
+      <button type="button" onclick="abrirPagoModal('{{ cita.Id_cita }}')">Pagar</button>
+      {% else %}
+      —
+      {% endif %}
+    </td>
+
+    <!-- CANCELAR -->
+    <td>
+      {% if bitacora.estatus_cita == "Agendada pendiente de pago" or bitacora.estatus_cita == "Pagada pendiente por atender" %}
+      <button type="button" onclick="abrirModal('{{ cita.Id_cita }}')">Cancelar</button>
+      {% else %}
+      —
+      {% endif %}
+    </td>
+
+  </tr>
+  {% endwith %}
+  {% endfor %}
+</table>
+
+{% else %}
+<p>No tienes citas registradas.</p>
+{% endif %}
+
+<!-- MODAL CANCELAR -->
+<div id="modalConfirmacion" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;">
+  <div style="background:white; padding:20px; border-radius:10px; width:320px;">
+    <h3>Confirmar cancelación</h3>
+    <p>¿Estás seguro de cancelar tu cita?</p>
+
+    <button id="confirmarBtn" style="background:red; color:white; padding:8px; margin-right:10px;">Sí, cancelar</button>
+    <button onclick="cerrarModal()">No</button>
+  </div>
+</div>
+
+<!-- MODAL PAGAR -->
+<div id="modalPagar" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center;
+  align-items:center;">
+  <div style="background:white; padding:20px; border-radius:10px; width:360px;">
+    <h3>Pagar cita</h3>
+    <p>Ingresa la línea de pago:</p>
+    <input id="inputLineaPago" type="text" placeholder="Línea de pago"
+           style="width:100%; padding:8px; margin-bottom:10px;">
+    <div style="text-align:right;">
+      <button id="confirmarPagoBtn" style="background:green; color:white; padding:8px; margin-right:8px;">Pagar</button>
+      <button onclick="cerrarPagoModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- CSRF ---------- */
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+/* ---------- CANCELAR ---------- */
+let citaIdSeleccionada = null;
+
+function abrirModal(id) {
+    citaIdSeleccionada = id;
+    document.getElementById("modalConfirmacion").style.display = "flex";
+}
+function cerrarModal() {
+    document.getElementById("modalConfirmacion").style.display = "none";
+}
+
+document.getElementById("confirmarBtn").onclick = function() {
+    fetch(`/cancelar_cita/${citaIdSeleccionada}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ confirm: true })
+    })
+    .then(r => r.json())
+    .then(data => {
+        cerrarModal();
+
+       Swal.fire({
+    icon: "success",
+    title: "Cita cancelada",
+    html: `<p style="font-size:18px; text-align:center;">${data.message}</p>`,
+    confirmButtonText: "OK",
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    allowEnterKey: true
+}).then(() => {
+    location.reload();
+});
+    })
+    .catch(err => {
+        cerrarModal();
+        Swal.fire({ icon: "error", title: "Error", text: "Error inesperado." });
+    });
+};
+
+/* ---------- PAGAR ---------- */
+let citaIdPagar = null;
+
+function abrirPagoModal(id) {
+    citaIdPagar = id;
+    document.getElementById("inputLineaPago").value = "";
+    document.getElementById("modalPagar").style.display = "flex";
+}
+function cerrarPagoModal() {
+    document.getElementById("modalPagar").style.display = "none";
+}
+
+document.getElementById("confirmarPagoBtn").onclick = function() {
+    const linea = document.getElementById("inputLineaPago").value.trim();
+
+    if (!linea) {
+        Swal.fire({ icon: "warning", title: "Línea vacía", text: "Ingresa la línea de pago." });
+        return;
+    }
+
+    fetch(`/pagar_cita/${citaIdPagar}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ linea_pago: linea })
+    })
+    .then(r => r.json())
+    .then(data => {
+        cerrarPagoModal();
+
+        Swal.fire({
+            icon: "success",
+            title: "Cita pagada",
+            html: `<p style="font-size:18px; text-align:center;">${data.message}</p>`,
+            confirmButtonText: "OK",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: true
+        }).then(() => {
+            location.reload();
+        });
+    })
+    .catch(err => {
+        cerrarPagoModal();
+        Swal.fire({ icon: "error", title: "Error", text: "Linea de pago erronea." });
+    });
+};
+</script>
+
 {% endblock %}

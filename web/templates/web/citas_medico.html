@@ -1,0 +1,121 @@
+{% extends "web/base.html" %}
+{% block title %}Citas del Médico{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<h2>Citas del Dr. {{ nombre_real }}</h2>
+
+{% if citas %}
+<table border="1" cellspacing="0" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Folio</th>
+        <th>Paciente</th>
+        <th>Fecha cita</th>
+        <th>Hora cita</th>
+        <th>Estatus</th>
+        <th>Atender</th>
+        <th>Solicitar cancelación</th>
+        <th>Ver paciente</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for cita in citas %}
+      <tr>
+        <td>{{ cita.id_bitacora }}</td>
+        <td>{{ cita.nombre_paciente }} {{ cita.apellido_paciente }}</td>
+        <td>{{ cita.ultimo_fecha|date:"d/m/Y" }}</td>
+        <td>{{ cita.ultimo_hora|time:"H:i" }}</td>
+        <td>{{ cita.ultimo_estatus }}</td>
+        <td>
+        {% if cita.ultimo_estatus == "Pagada pendiente por atender" %}
+        <button onclick="atenderCita('{{ cita.Id_cita }}')">
+            Atender
+        </button>
+        {% else %}
+        —
+        {% endif %}
+        </td>
+        <td>
+    <!-- SOLICITAR CANCELACIÓN -->
+    {% if cita.ultimo_estatus == "Pagada pendiente por atender" %}
+        <form method="POST" action="{% url 'solicitar_cancelacion_medico' cita.Id_cita %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Solicitar cancelación</button>
+        </form>
+    {% else %}
+        —
+    {% endif %}
+    </td>
+    <td>
+    <!-- VER DATOS PACIENTE -->
+    <a href="{% url 'datos_paciente_medico' cita.Id_paciente_id %}">
+        <button type="button">Ver paciente</button>
+    </a>
+    </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No hay citas pendientes ni atendidas.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+</table>
+
+
+{% else %}
+  <p>No hay citas pendientes ni atendidas.</p>
+{% endif %}
+
+<br>
+<a href="{% url 'panel_doctor' %}">
+    <button type="button">Regresar</button>
+</a>
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function atenderCita(idCita) {
+    fetch(`/atender_cita/${idCita}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrftoken
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === "ok") {
+            Swal.fire({
+                icon: "success",
+                title: "Cita atendida",
+                text: data.message,
+                confirmButtonText: "OK"
+            }).then(() => location.reload());
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "No permitido",
+                text: data.message,
+                confirmButtonText: "OK"
+            });
+        }
+    });
+}
+const csrftoken = getCookie('csrftoken');
+</script>
+
+{% endblock %}

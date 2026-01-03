@@ -1,0 +1,80 @@
+{% extends "web/base.html" %}
+{% block title %}Gestión de Doctores{% endblock %}
+
+{% block content %}
+<h2>Gestión de Doctores</h2>
+
+<a href="{% url 'alta_doctor' %}">
+    <button type="button">➕ Dar de alta doctor</button>
+</a>
+
+<br><br>
+
+{% for message in messages %}
+  <p class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+    {{ message }}
+  </p>
+{% endfor %}
+
+<table border="1" cellspacing="0" cellpadding="6">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Especialidad</th>
+      <th>Estado</th>
+      <th>Alta/Baja</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for d in doctores %}
+    <tr>
+      <td>{{ d.Id_doctor }}</td>
+
+      <td>
+        {{ d.Id_usuario.Id_usuario.nombre }}
+        {{ d.Id_usuario.Id_usuario.apellido_P }}
+      </td>
+
+      <td>{{ d.Id_especialidad.tipo_Especialidad }}</td>
+
+      <td>
+        {% if d.disponibilidad %}
+          Activo
+        {% else %}
+          Inactivo
+        {% endif %}
+      </td>
+
+      <td>
+        <form method="POST"
+              action="{% url 'cambiar_estado_doctor' d.Id_doctor %}"
+              style="display:inline;">
+          {% csrf_token %}
+
+          {% if d.disponibilidad %}
+            <button type="submit" style="background:red;color:white;">
+              Dar de baja
+            </button>
+          {% else %}
+            <button type="submit" style="background:green;color:white;">
+              Dar de alta
+            </button>
+          {% endif %}
+        </form>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5">No hay doctores registrados.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<br>
+<a href="{% url 'panel_recepcionista' %}">
+  <button type="button">Regresar</button>
+</a>
+{% endblock %}

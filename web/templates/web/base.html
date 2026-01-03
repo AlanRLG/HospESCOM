@@ -14,13 +14,23 @@
       {% if request.session.usuario_tipo == 'paciente' %}
         <a href="{% url 'panel_paciente' %}">Inicio</a>
         <a href="{% url 'datos_personales' %}">Datos personales</a>
+        <a href="{% url 'citas_agendadas' %}">Citas agendadas</a>
         <a href="{% url 'agendar_cita' %}">Agendar Cita</a>
         <a href="{% url 'logout' %}">Cerrar Sesión</a>
       {% elif request.session.usuario_tipo == 'doctor' %}
-        <a href="{% url 'panel_doctor' %}">Panel Doctor</a>
+        <a href="{% url 'panel_doctor' %}">Inicio</a>
+        <a href="{% url 'datos_doctor' %}">Mis Datos</a>
+        <a href="{% url 'citas_medico' %}">Mis Citas</a>
+        <a href="{% url 'historial_recetas' %}">Recetas</a>
         <a href="{% url 'logout' %}">Cerrar Sesión</a>
       {% elif request.session.usuario_tipo == 'recepcionista' %}
-        <a href="{% url 'panel_recepcionista' %}">Panel Recepción</a>
+        <a href="{% url 'panel_recepcionista' %}">Inicio</a>
+        <a href="{% url 'cobro_inicio' %}">Cobro</a>
+        <a href="{% url 'farmacia' %}">Farmacia</a>
+        <a href="{% url 'servicios_recepcionista' %}">Servicios</a>
+        <a href="{% url 'bitacora_citas_recepcionista' %}">Bitácora de Citas</a>
+        <a href="{% url 'gestionar_recepcionistas' %}">Gestionar Recepcionistas</a>
+        <a href="{% url 'gestionar_doctores' %}">Gestionar Doctores</a>
         <a href="{% url 'logout' %}">Cerrar Sesión</a>
       {% else %}
         <a href="{% url 'index' %}">Inicio</a>

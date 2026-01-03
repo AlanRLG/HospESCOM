@@ -1,5 +1,7 @@
 {% extends "web/base.html" %}
 {% block title %}Panel del Paciente{% endblock %}
+{% load custom_filters %}
+
 
 {% block content %}
   <h2>Bienvenido, paciente {{ nombre_paciente }}</h2>
@@ -14,18 +16,22 @@
   {% if citas_proximas %}
     <table border="1" cellspacing="0" cellpadding="5">
       <tr>
-        <th>Fecha</th>
-        <th>Hora</th>
+        <th>Folio</th>
+        <th>Fecha cita</th>
+        <th>Hora cita</th>
         <th>Doctor</th>
         <th>Especialidad</th>
       </tr>
       {% for cita in citas_proximas %}
+         {% with bitacora=bitacoras|get_item:cita.Id_cita %}
         <tr>
-          <td>{{ cita.fecha_limite|date:"d/m/Y" }}</td>
-          <td>{{ cita.fecha_limite|time:"H:i" }}</td>
+          <td>{{ cita.Id_cita }}</td>
+          <td>{{ bitacora.fecha_cita|date:"d/m/Y" }}</td>
+          <td>{{ bitacora.hora_cita|time:"H:i" }}</td>
           <td>{{ cita.Id_doctor.Id_usuario.Id_usuario.nombre }} {{ cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}</td>
           <td>{{ cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
         </tr>
+        {% endwith %}
       {% endfor %}
     </table>
   {% else %}

@@ -42,6 +42,7 @@
   <p class="{% if 'correctamente' in message %}success{% else %}error{% endif %}">{{ message }}</p>
 {% endfor %}
 
+
 <script>
     document.getElementById("especialidad").addEventListener("change", function() {
         const espId = this.value;
@@ -66,7 +67,19 @@
             });
         } else {
             doctorSelect.innerHTML = "<option value=''>-- Selecciona una especialidad primero --</option>";
-  }
-});
+        }
+    });
 </script>
+
+{% if descargar_y_redirigir %}
+<script>
+    // Descargar el PDF
+    window.location.href = '/agendar_cita/?descargar_pdf=true';
+    
+    // Redirigir después de un pequeño delay para permitir la descarga
+    setTimeout(function() {
+        window.location.href = '/agendar_cita/';
+    }, 1000);
+</script>
+{% endif %}
 {% endblock %}

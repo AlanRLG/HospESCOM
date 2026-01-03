@@ -1,0 +1,91 @@
+{% extends "web/base.html" %}
+{% block title %}Alta de Doctor{% endblock %}
+
+{% block content %}
+<h2>Dar de alta doctor</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Nombre:</label>
+    <input type="text" name="nombre" required><br><br>
+
+    <label>Apellido paterno:</label>
+    <input type="text" name="apellido_p" required><br><br>
+
+    <label>Apellido materno:</label>
+    <input type="text" name="apellido_m"><br><br>
+
+    <label>CURP:</label>
+    <input type="text" name="curp" maxlength="18" required><br><br>
+
+    <label>Correo:</label>
+    <input type="email" name="correo" required><br><br>
+
+    <label>Contraseña:</label>
+    <input type="password" name="password" required><br><br>
+
+    <hr>
+
+    <label>Calle:</label>
+    <input type="text" name="calle"><br><br>
+
+    <label>Colonia:</label>
+    <input type="text" name="colonia"><br><br>
+
+    <label>Código Postal:</label>
+    <input type="text" name="cp" maxlength="10"><br><br>
+
+    <label>Teléfono:</label>
+    <input type="text" name="telefono" maxlength="20"><br><br>
+
+    <hr>
+
+    
+    <h3>Horario del doctor</h3>
+
+    {% for dia in dias %}
+    <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;">
+        <label>
+        <input type="checkbox" name="dias" value="{{ dia.Id_Dia }}">
+        {{ dia.nombre_dia }}
+        </label>
+        <br>
+        Hora entrada:
+        <input type="time" name="entrada_{{ dia.Id_Dia }}">
+        <br>
+        Hora salida:
+        <input type="time" name="salida_{{ dia.Id_Dia }}">
+    </div>
+    {% endfor %}
+
+    <br><hr><br>
+
+    <label>Cédula profesional:</label>
+    <input type="text" name="cedula" required><br><br>
+
+    <label>Especialidad:</label>
+    <select name="especialidad" required>
+        {% for e in especialidades %}
+        <option value="{{ e.Id_Especialidad }}">{{ e.tipo_Especialidad }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Consultorio:</label>
+    <select name="consultorio" required>
+        {% for c in consultorios %}
+        <option value="{{ c.Id_consultorio }}">{{ c.Id_consultorio }}</option>
+        {% endfor %}
+    </select><br><br>
+
+
+
+    <button type="submit">Guardar</button>
+</form>
+
+<br>
+
+<a href="{% url 'gestionar_doctores' %}">
+    <button type="button">Cancelar</button>
+</a>
+{% endblock %}

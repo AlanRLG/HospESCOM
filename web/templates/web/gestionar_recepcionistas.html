@@ -1,0 +1,47 @@
+{% extends "web/base.html" %}
+{% block title %}Gestión de Recepcionistas{% endblock %}
+
+{% block content %}
+<h2>Recepcionistas</h2>
+
+{% if recepcionistas %}
+<table border="1" cellspacing="0" cellpadding="6">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in recepcionistas %}
+        <tr>
+            <td>{{ r.id_Recepcionista }}</td>
+            <td>
+                {{ r.Id_usuario.Id_usuario.nombre }}
+                {{ r.Id_usuario.Id_usuario.apellido_P }}
+                {{ r.Id_usuario.Id_usuario.apellido_M }}
+            </td>
+            <td>{{ r.Id_usuario.Id_usuario.correo }}</td>
+            <td>{{ r.Id_usuario.Id_usuario.num_Tel|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay recepcionistas registrados.</p>
+{% endif %}
+
+<br>
+
+
+<a href="{% url 'alta_recepcionista' %}">
+    <button type="button">Agregar Recepcionista</button>
+</a>
+
+<a href="{% url 'panel_recepcionista' %}">
+    <button type="button">Regresar</button>
+</a>
+
+{% endblock %}

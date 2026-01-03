@@ -1,0 +1,79 @@
+{% extends "web/base.html" %}
+{% block title %}Cobro{% endblock %}
+
+{% block content %}
+<h2>Nuevo Cobro</h2>
+
+{% for message in messages %}
+  <p class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+    {{ message }}
+  </p>
+{% endfor %}
+
+<form method="POST">
+  {% csrf_token %}
+
+  <h4>Paciente</h4>
+  <select name="paciente" id="paciente" onchange="bloquearCliente()">
+    <option value="">-- Selecciona paciente --</option>
+    {% for p in pacientes %}
+      <option value="{{ p.Id_Paciente }}">
+        {{ p.Id_usuario.nombre }} {{ p.Id_usuario.apellido_P }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <br><br>
+
+  <h4>Cliente externo</h4>
+  <select name="cliente" id="cliente" onchange="bloquearPaciente()">
+    <option value="">-- Selecciona cliente --</option>
+    {% for c in clientes %}
+      <option value="{{ c.Id_Cliente }}">
+        {{ c.nombreC }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <br><br>
+
+  <a href="{% url 'alta_cliente' %}">
+    <button type="button">➕ Cliente nuevo</button>
+  </a>
+
+  <br><br>
+
+  <button type="submit">Crear Ticket</button>
+</form>
+
+<br>
+
+<a href="{% url 'panel_recepcionista' %}">
+  <button type="button">Regresar</button>
+</a>
+
+<script>
+function bloquearCliente() {
+    const paciente = document.getElementById("paciente");
+    const cliente = document.getElementById("cliente");
+
+    if (paciente.value !== "") {
+        cliente.disabled = true;
+    } else {
+        cliente.disabled = false;
+    }
+}
+
+function bloquearPaciente() {
+    const paciente = document.getElementById("paciente");
+    const cliente = document.getElementById("cliente");
+
+    if (cliente.value !== "") {
+        paciente.disabled = true;
+    } else {
+        paciente.disabled = false;
+    }
+}
+</script>
+
+{% endblock %}

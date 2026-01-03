@@ -1,0 +1,79 @@
+{% extends "web/base.html" %}
+{% block title %}Ticket{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<h3>Resumen del Ticket #{{ ticket.Id_Ticket }}</h3>
+
+<hr>
+
+<h5>Medicamentos</h5>
+<ul>
+{% for m in meds_ticket %}
+    <li>{{ m.Id_Medicamento.nombre }} — {{ m.cantidad }} x ${{ m.precio_unitario }}</li>
+{% endfor %}
+</ul>
+
+<h5>Servicios</h5>
+<ul>
+{% for s in servs_ticket %}
+    <li>{{ s.Id_Servicio.nombre_servicio }} — ${{ s.precio }}</li>
+{% endfor %}
+</ul>
+
+<hr>
+
+<h4>Total a pagar: ${{ total }}</h4>
+
+<form id="form-pago">
+    {% csrf_token %}
+    <select name="metodo" required>
+        <option value="">Método de pago</option>
+        <option value="Efectivo">Efectivo</option>
+        <option value="Tarjeta">Tarjeta</option>
+    </select>
+
+    <input type="text" name="descripcion" placeholder="Descripción (opcional)">
+
+    <button type="submit" class="btn btn-success">
+        Confirmar pago
+    </button>
+</form>
+
+<a href="{% url 'cobro_ticket' ticket.Id_Ticket %}">
+    <button type="button" class="btn btn-secondary">Regresar</button>
+</a>
+
+
+<script>
+document.getElementById("form-pago").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    fetch("{% url 'pagar_ticket' ticket.Id_Ticket %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new FormData(this)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "ok") {
+            Swal.fire({
+                icon: "success",
+                title: "Pago realizado",
+                text: data.message,
+                confirmButtonText: "Aceptar"
+            }).then(() => {
+                window.location.href = "{% url 'cobro_inicio' %}";
+            });
+        } else {
+            Swal.fire("Error", "No se pudo procesar el pago", "error");
+        }
+    });
+});
+</script>
+
+
+{% endblock %}

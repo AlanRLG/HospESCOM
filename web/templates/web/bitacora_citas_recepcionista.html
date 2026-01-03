@@ -1,0 +1,149 @@
+{% extends "web/base.html" %}
+{% block title %}Bitácora de Citas{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<h2>Bitácora de Citas</h2>
+
+<table border="1" cellspacing="0" cellpadding="6">
+  <thead>
+    <tr>
+      <th>Folio</th>
+      <th>Fecha</th>
+      <th>Hora</th>
+      <th>Médico</th>
+      <th>Especialidad</th>
+      <th>Paciente</th>
+      <th>Estatus</th>
+      <th>Cancelar doctor</th>
+      <th>Cancelar paciente</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in bitacoras %}
+    <tr>
+      <td>{{ b.Id_cita.Id_cita }}</td>
+      <td>{{ b.fecha_cita|date:"d/m/Y" }}</td>
+      <td>{{ b.hora_cita|time:"H:i" }}</td>
+      <td>
+        {{ b.Id_cita.Id_doctor.Id_usuario.Id_usuario.nombre }}
+        {{ b.Id_cita.Id_doctor.Id_usuario.Id_usuario.apellido_P }}
+      </td>
+      <td>{{ b.Id_cita.Id_doctor.Id_especialidad.tipo_Especialidad }}</td>
+      <td>
+        {{ b.Id_cita.Id_paciente.Id_usuario.nombre }}
+        {{ b.Id_cita.Id_paciente.Id_usuario.apellido_P }}
+      </td>
+      <td>{{ b.estatus_cita }}</td>
+
+      <td>
+        {% if b.estatus_cita == "Solicitud de cancelación por médico" %}
+      <button onclick="confirmarCancelacionMedico({{ b.Id_cita.Id_cita }})">
+        Autorizar cancelación
+      </button>
+        {% else %}
+        —
+        {% endif %}
+      </td>
+      <td>
+      {% if b.estatus_cita == "Pagada pendiente por atender" or b.estatus_cita == "Agendada pendiente de pago" %}
+      <button onclick="cancelarCitaPaciente({{ b.Id_cita.Id_cita }})">
+        Cancelar cita
+      </button>
+
+        {% else %}
+        —
+        {% endif %}
+      </td>
+
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="8">No hay registros</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<br>
+<a href="{% url 'panel_recepcionista' %}">
+  <button>Regresar</button>
+</a>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+
+function cancelarCitaPaciente(idCita) {
+    Swal.fire({
+        title: "¿Cancelar cita?",
+        text: "Esta acción no se puede deshacer",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, cancelar",
+        cancelButtonText: "No"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/cancelar_cita_paciente/${idCita}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === "ok") {
+                    Swal.fire("Cancelada", data.message, "success")
+                        .then(() => location.reload());
+                } else {
+                    Swal.fire("Error", data.message, "error");
+                }
+            });
+        }
+    });
+}
+
+
+function confirmarCancelacionMedico(idCita) {
+    Swal.fire({
+        title: "¿Autorizar cancelación?",
+        text: "El médico solicitó cancelar esta cita.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Autorizar",
+        cancelButtonText: "Rechazar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/autorizar_cancelacion_medico/${idCita}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                Swal.fire(data.status === "ok" ? "Cancelada" : "Error", data.message,
+                    data.status === "ok" ? "success" : "error"
+                ).then(() => location.reload());
+            });
+        }
+    });
+}
+</script>
+
+
+{% endblock %}

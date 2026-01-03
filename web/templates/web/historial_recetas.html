@@ -1,0 +1,168 @@
+{% extends "web/base.html" %}
+
+{% block title %}Historial de Recetas{% endblock %}
+
+{% block content %}
+
+<style>
+    .tabla-moderna {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95em;
+        font-family: sans-serif;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .tabla-moderna thead tr {
+        background-color: #004080;
+        color: #ffffff;
+        text-align: left;
+    }
+
+    .tabla-moderna th,
+    .tabla-moderna td {
+        padding: 12px 15px;
+    }
+
+    .tabla-moderna tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .tabla-moderna tbody tr:nth-of-type(even) {
+        background-color: #f8f9fa;
+    }
+
+    .tabla-moderna tbody tr:hover {
+        background-color: #e2e6ea;
+        cursor: default;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .tabla-moderna tbody tr:last-of-type {
+        border-bottom: 2px solid #004080;
+    }
+
+    .btn-ver {
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-ver:hover {
+        background-color: #138496;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .texto-secundario {
+        color: #666;
+        font-size: 0.85em;
+    }
+</style>
+
+<div style="max-width: 1100px; margin: 30px auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #004080; padding-bottom: 10px; margin-bottom: 20px;">
+        <h2 style="color: #004080; margin: 0;">Historial de Recetas</h2>
+    </div>
+    
+    <div style="background: linear-gradient(to right, #e3f2fd, #ffffff); padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid #2196f3; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #0d47a1; font-size: 1.1em;">Generar Nueva Receta</h3>
+        <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
+            <input type="number" id="idPacienteInput" placeholder="ID Paciente (ej: 11)" 
+                   style="padding: 10px; width: 180px; border: 1px solid #ced4da; border-radius: 5px;">
+            <button onclick="irAGenerar()" 
+                    style="padding: 10px 25px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                ➕ Crear Receta
+            </button>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <small style="color: #dc3545; font-weight: bold; display: block; margin-top: 5px; padding: 5px; border-radius: 4px; width: fit-content;">
+                    {{ message }}
+                </small>
+            {% endfor %}
+        {% else %}
+            <small style="color: #6c757d; display: block; margin-top: 8px;">* Asegúrate de que el paciente tenga una cita programada para hoy.</small>
+        {% endif %}
+    </div>
+
+    <script>
+        function irAGenerar() {
+            var id = document.getElementById('idPacienteInput').value;
+            if(id) window.location.href = "/generar_receta/" + id + "/";
+            else alert("Ingresa un ID válido");
+        }
+    </script>
+    
+    <form method="GET" style="margin-bottom: 25px; display: flex; gap: 10px;">
+        <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar por Nombre del Médico o Cédula" 
+               style="flex: 1; padding: 12px; border: 1px solid #ced4da; border-radius: 5px; font-size: 1em;">
+        <button type="submit" style="padding: 10px 30px; background: #004080; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold;">
+            Buscar
+        </button>
+    </form>
+
+    {% if recetas %}
+        <div style="overflow-x: auto;">
+            <table class="tabla-moderna">
+                <thead>
+                    <tr>
+                        <th style="width: 5%; text-align: center;">#</th>
+                        <th style="width: 10%;">Fecha</th>
+                        <th style="width: 15%;">Paciente</th>
+                        <th style="width: 20%;">Médico</th>
+                        <th style="width: 15%;">Diagnostico</th>
+                        <th style="width: 15%;">Medicamentos</th>
+                        <th style="width: 10%;">Obs</th>
+                        <th style="width: 10%; text-align: center;">Acción</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recetas %}
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; color: #004080;">{{ r.Id_Receta }}</td>
+                        <td>{{ r.fecha_receta|date:"d/m/Y" }}</td>
+                        <td style="font-weight: 500;">{{ r.Nombre_Paciente }}</td>
+                        <td>
+                            <div style="font-weight: bold; color: #333;">{{ r.Nombre_Doctor }}</div>
+                            <div class="texto-secundario">Céd: {{ r.cedula_Pro }}</div>
+                        </td>
+                        <td>{{ r.diagnostico|truncatechars:30 }}</td>
+                        <td>{{ r.medicamentos|truncatechars:30 }}</td>
+                        <td>{{ r.observaciones|truncatechars:20 }}</td>
+                        
+                        <td style="text-align: center;">
+                            <a href="{% url 'ver_receta_detalle' r.Id_Receta %}" class="btn-ver">
+                                👁️ Ver
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        {% if busqueda %}
+            <div style="text-align: center; padding: 40px; color: #dc3545; background: #fff5f5; border-radius: 8px;">
+                <h5>Intenta con otro nombre o cédula.</h5>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #666; background: #f8f9fa; border-radius: 8px; border: 2px dashed #ccc;">
+                <h5>Ingresa el nombre de un médico para ver su historial.</h5>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

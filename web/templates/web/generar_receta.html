@@ -1,0 +1,158 @@
+{% extends "web/base.html" %}
+{% block title %}Nueva Receta Médica{% endblock %}
+
+{% block content %}
+
+<style>
+.form-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 5px;
+}
+
+.medicamento-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    padding: 15px;
+}
+
+.btn-remove {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.btn-remove:hover {
+    background: #b91c1c;
+}
+
+.mb-section {
+    margin-bottom: 30px;
+}
+
+textarea {
+    resize: none;
+}
+</style>
+
+<div class="form-card">
+
+    <h3 class="mb-4 text-primary">Nueva Receta Médica</h3>
+
+    <!-- ENCABEZADO -->
+    <div class="card mb-section">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Paciente:</strong> {{ nombre_paciente }}</p>
+                    <p><strong>Fecha:</strong> {{ fecha }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p><strong>Médico:</strong> {{ nombre_medico }}</p>
+                    <p><strong>Folio Cita:</strong> #{{ cita_id }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- DIAGNOSTICO -->
+        <div class="mb-section">
+            <h5 class="section-title">Diagnóstico</h5>
+            <textarea name="diagnostico" class="form-control" rows="4" required></textarea>
+        </div>
+
+        <!-- MEDICAMENTOS -->
+        <div class="mb-section">
+            <h5 class="section-title">Medicamentos</h5>
+
+            <div id="medicamentos-container">
+
+                <div class="medicamento-item mb-3">
+                    <div class="row g-3 align-items-end">
+
+                        <div class="col-md-3">
+                            <label class="form-label">Medicamento</label>
+                            <input type="text" name="medicamento[]" class="form-control" required>
+                        </div>
+                        <br>        
+                        <div class="col-md-3">
+                            <label class="form-label">Frecuencia</label>
+                            <input type="text" name="frecuencia[]" class="form-control">
+                        </div>
+                        <br>
+                        <div class="col-md-2">
+                            <label class="form-label">Duración</label>
+                            <input type="text" name="duracion[]" class="form-control">
+                        </div>
+                        <br>
+                        <div class="col-md-3">
+                            <label class="form-label">Indicaciones</label>
+                            <input type="text" name="indicaciones[]" class="form-control">
+                        </div>
+                        <br>
+                        <div class="col-md-1 text-center">
+                            <button type="button" class="btn-remove" onclick="quitarMedicamento(this)">✕</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <button type="button" class="btn btn-outline-primary mt-2" onclick="agregarMedicamento()">
+                + Agregar medicamento
+            </button>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="mb-section">
+            <h5 class="section-title">Observaciones</h5>
+            <textarea name="observaciones" class="form-control" rows="3"></textarea>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'historial_recetas' %}" class="btn btn-link"><button type="button">Cancelar</button></a>
+            <button type="submit" class="btn btn-primary px-4">Guardar Receta</button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+function agregarMedicamento() {
+    const container = document.getElementById('medicamentos-container');
+    const item = container.children[0].cloneNode(true);
+
+    item.querySelectorAll('input').forEach(input => input.value = '');
+    container.appendChild(item);
+}
+
+function quitarMedicamento(btn) {
+    const container = document.getElementById('medicamentos-container');
+
+    if (container.children.length > 1) {
+        btn.closest('.medicamento-item').remove();
+    } else {
+        alert('Debe existir al menos un medicamento');
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "web/base.html" %}
+{% block title %}Alta de Recepcionista{% endblock %}
+
+{% block content %}
+<h2>Dar de alta recepcionista</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Nombre:</label>
+    <input type="text" name="nombre" required><br><br>
+
+    <label>Apellido paterno:</label>
+    <input type="text" name="apellido_p" required><br><br>
+
+    <label>Apellido materno:</label>
+    <input type="text" name="apellido_m"><br><br>
+
+    <label>CURP:</label>
+    <input type="text" name="curp" required><br><br>
+
+    <label>Correo:</label>
+    <input type="email" name="correo" required><br><br>
+
+    <label>Contraseña:</label>
+    <input type="password" name="password" required><br><br>
+
+    <label>Teléfono:</label>
+    <input type="text" name="telefono"><br><br>
+
+    <label>Calle:</label>
+    <input type="text" name="calle"><br><br>
+
+    <label>Colonia:</label>
+    <input type="text" name="colonia"><br><br>
+
+    <label>Código Postal:</label>
+    <input type="text" name="cp"><br><br>
+
+    <button type="submit">Guardar</button>
+</form>
+<br>
+<a href="{% url 'gestionar_recepcionistas' %}">
+    <button type="button">Cancelar</button>
+</a>
+{% endblock %}
