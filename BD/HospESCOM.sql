@@ -169,60 +169,12 @@ CREATE TABLE Farmacia_Medicamentos (
 );
 GO
 
--- Tabla: Venta_Med
-CREATE TABLE Venta_Med (
-    Id_VentaMed INT PRIMARY KEY IDENTITY(1,1),
-    cantidad INT NOT NULL,
-    precio_unitario DECIMAL(10,2) NOT NULL,
-    subtotal AS (cantidad * precio_unitario) PERSISTED,
-    Id_Medicamento INT NOT NULL,
-    Id_recepcionista INT NOT NULL,
-    FOREIGN KEY (Id_Medicamento) REFERENCES Farmacia_Medicamentos(Id_medicamento),
-    FOREIGN KEY (Id_recepcionista) REFERENCES Recepcionista(id_Recepcionista)
-);
-GO
-
 -- Tabla: Servicio
 CREATE TABLE Servicio (
     Id_Servicio INT PRIMARY KEY IDENTITY(1,1),
     nombre_servicio NVARCHAR(200) NOT NULL,
     costo DECIMAL(10,2) NOT NULL,
     descripcion NVARCHAR(500),
-);
-GO
-
--- Tabla: Venta_servicio
-CREATE TABLE Venta_servicio (
-    id_VentaServicio INT PRIMARY KEY IDENTITY(1,1),
-    tipo_servicio NVARCHAR(100),
-    subtotal DECIMAL(10,2), 
-    id_Servicio INT NOT NULL,
-    Id_recepcionista INT NOT NULL,
-    FOREIGN KEY (id_Servicio) REFERENCES Servicio(Id_Servicio),
-    FOREIGN KEY (Id_recepcionista) REFERENCES Recepcionista(id_Recepcionista)
-);
-GO
-
--- Tabla: Ticket
-CREATE TABLE Ticket (
-    id_ticket INT PRIMARY KEY IDENTITY(1,1),
-    costo_total DECIMAL(10,2) NOT NULL,
-    id_VentaServicio INT,
-    id_VentaMed INT,
-    FOREIGN KEY (id_VentaServicio) REFERENCES Venta_servicio(id_VentaServicio),
-    FOREIGN KEY (id_VentaMed) REFERENCES Venta_Med(Id_VentaMed)
-);
-GO
-
--- Tabla: pago_Ticket
-CREATE TABLE pago_Ticket (
-    id_pagoTicket INT PRIMARY KEY IDENTITY(1,1),
-    fecha_pago DATETIME DEFAULT GETDATE(),
-    estado_pagoT NVARCHAR(50),
-    metodo_pagoT NVARCHAR(50),
-    des_pagoT NVARCHAR(500),
-    id_ticket INT NOT NULL,
-    FOREIGN KEY (id_ticket) REFERENCES Ticket(id_ticket)
 );
 GO
 
@@ -233,26 +185,6 @@ CREATE TABLE Cliente (
     numeroC NVARCHAR(20),
     correoC NVARCHAR(150),
     genero NVARCHAR(20)
-);
-GO
-
--- Tabla intermedia: Cliente_Venta_servicio (relación M:M entre Cliente y Venta_servicio)
-CREATE TABLE Cliente_Venta_servicio (
-    Id_Cliente INT NOT NULL,
-    id_VentaServicio INT NOT NULL,
-    PRIMARY KEY (Id_Cliente, id_VentaServicio),
-    FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),
-    FOREIGN KEY (id_VentaServicio) REFERENCES Venta_servicio(id_VentaServicio)
-);
-GO
-
--- Tabla intermedia: Cliente_Venta_Med (relación M:M entre Cliente y Venta_Med)
-CREATE TABLE Cliente_Venta_Med (
-    Id_Cliente INT NOT NULL,
-    Id_VentaMed INT NOT NULL,
-    PRIMARY KEY (Id_Cliente, Id_VentaMed),
-    FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),
-    FOREIGN KEY (Id_VentaMed) REFERENCES Venta_Med(Id_VentaMed)
 );
 GO
 
@@ -328,7 +260,7 @@ CREATE TABLE HorarioEmpleado (
 );
 GO
 
--- Tabla Horario_Servicio
+-- Tabla: Horario_Servicio
 CREATE TABLE Horario_Servicio (
     Id_HorarioServicio INT PRIMARY KEY IDENTITY(1,1),
     id_Servicio INT NOT NULL,
@@ -339,3 +271,98 @@ CREATE TABLE Horario_Servicio (
     FOREIGN KEY (Id_Dia) REFERENCES Dia_Semana(Id_Dia)
 );
 GO
+
+--Tabla: bitacora_Historial
+CREATE TABLE bitacora_Historial (
+    Id_Historial INT IDENTITY(1,1) PRIMARY KEY,
+    Id_cita INT NOT NULL,
+    Id_paciente INT NOT NULL,
+    Id_doctor INT NOT NULL,
+    Usuario NVARCHAR(200) NOT NULL,
+    Especialidad NVARCHAR(100) NOT NULL,
+    Consultorio INT NOT NULL,
+    Fecha_cita DATE NOT NULL,
+    Hora_cita TIME NOT NULL,
+    Folio_cita INT NOT NULL,
+    Estatus_consulta NVARCHAR(50) NOT NULL,
+    Fecha_registro DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (Id_cita) REFERENCES Cita(Id_cita),
+    FOREIGN KEY (Id_paciente) REFERENCES Paciente(Id_Paciente),
+    FOREIGN KEY (Id_doctor) REFERENCES Doctor(Id_doctor)
+);
+GO
+
+--Tabla: Ticket
+CREATE TABLE Ticket (
+    Id_Ticket INT PRIMARY KEY IDENTITY(1,1),
+    fecha DATETIME DEFAULT GETDATE(),
+    total DECIMAL(10,2) NOT NULL,
+    Id_Recepcionista INT NOT NULL,
+    Id_Paciente INT NULL,
+    Id_Cliente INT NULL,
+
+    FOREIGN KEY (Id_Recepcionista) REFERENCES Recepcionista(id_Recepcionista),
+    FOREIGN KEY (Id_Paciente) REFERENCES Paciente(Id_Paciente),
+    FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),
+);
+GO
+
+--Tabla: Ticket_Medicamento
+CREATE TABLE Ticket_Medicamento (
+    Id_TicketMed INT PRIMARY KEY IDENTITY(1,1),
+    Id_Ticket INT NOT NULL,
+    Id_Medicamento INT NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal AS (cantidad * precio_unitario) PERSISTED,
+
+    FOREIGN KEY (Id_Ticket) REFERENCES Ticket(Id_Ticket),
+    FOREIGN KEY (Id_Medicamento) REFERENCES Farmacia_Medicamentos(Id_medicamento)
+);
+GO
+
+--Tabla: Ticket_Servicio
+CREATE TABLE Ticket_Servicio (
+    Id_TicketServicio INT PRIMARY KEY IDENTITY(1,1),
+    Id_Ticket INT NOT NULL,
+    Id_Servicio INT NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+
+    FOREIGN KEY (Id_Ticket) REFERENCES Ticket(Id_Ticket),
+    FOREIGN KEY (Id_Servicio) REFERENCES Servicio(Id_Servicio)
+);
+GO
+
+
+--Tabla: Pago_Ticket
+CREATE TABLE Pago_Ticket (
+    Id_PagoTicket INT PRIMARY KEY IDENTITY(1,1),
+    Id_Ticket INT NOT NULL,
+    fecha_pago DATETIME DEFAULT GETDATE(),
+    metodo_pago NVARCHAR(50),
+    estado_pago NVARCHAR(50),
+    descripcion NVARCHAR(500),
+
+    FOREIGN KEY (Id_Ticket) REFERENCES Ticket(Id_Ticket)
+);
+GO
+
+--Tabla: Receta_Medicamento
+CREATE TABLE Receta_Medicamento (
+    Id_Receta_Medicamento INT IDENTITY(1,1) PRIMARY KEY,
+    Id_Receta INT NOT NULL,
+    medicamento NVARCHAR(200) NOT NULL,
+    frecuencia NVARCHAR(100) NOT NULL,
+    duracion NVARCHAR(100) NOT NULL,
+    indicaciones NVARCHAR(500) NULL,
+
+    CONSTRAINT FK_RecetaMedicamento_Receta
+        FOREIGN KEY (Id_Receta)
+        REFERENCES Receta(Id_Receta)
+        ON DELETE CASCADE
+);
+GO
+
+-- nueva columna en cita
+ALTER TABLE Cita
+ADD linea_pago NVARCHAR(200) NULL;
