@@ -8,23 +8,29 @@
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-  <header>
-    <h1>Bienvenido a HospESCOM</h1>
-    <nav>
+  <header class="header fade-in">
+     <div class="logo">Bienvenido a <span>HospESCOM</span></div>
+     <!--Menú móvil-->
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="menu-icon">
+        </label>
+    <nav class="nav">
       <a href="{% url 'index' %}">Inicio</a>
       <a href="{% url 'login' %}">Iniciar sesión</a>
       <a href="{% url 'registro_paciente' %}" class="btn">Registrarse</a>
     </nav>
   </header>
 
-  <main>
+  <main class="hero slide-up">
+    <div class="hero-content">
     <h2>Bienvenido al sistema del hospital</h2>
     <p>Atención médica de calidad a tu alcance.</p>
+    </div>
   </main>
 
-  <footer>
+
+  <footer class="footer fade-in">
     <p>© {{ year }} Hospital ESCOM</p>
   </footer>
 </body>
 </html>
-
